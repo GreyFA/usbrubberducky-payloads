@@ -1,5 +1,5 @@
 # Define the volume label you're looking for
-$targetLabel = "DUCKY"
+$targetLabel = "USB.R.D."
 
 # Find the drive letter of the USB drive with the specified label
 $volume = Get-Volume | Where-Object { $_.FileSystemLabel -eq $targetLabel }
@@ -47,3 +47,4 @@ $jsonBody | Out-File -FilePath $usbPath -Encoding UTF8
 Clear-History
 
 exit
+

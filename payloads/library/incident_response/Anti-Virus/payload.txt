@@ -1,0 +1,46 @@
+
+
+REM It scans users, tasks, registry, specific files, and suspicious payloads.
+REM Report saved to X:\Report.txt (USB in storage mode at end).
+By: Mr.Ender
+
+
+
+
+DELAY 3000
+GUI r
+DELAY 200
+STRING powershell -ep Bypass -c "IEX (gc '%~f0' -raw)"
+ENTER
+STRING $d=[Environment]::GetFolderPath('Desktop')
+ENTER
+STRING md "$d\RubberDuckyAnalysis" -Force | Out-Null
+ENTER
+STRING $t=Get-Date -f yyyyMMdd_HHmmss
+ENTER
+STRING $log='X:\Report.txt'
+ENTER
+STRING "ENDER RESPECT v2025 - $t`n-----------------------------`n" | Out-File $log
+ENTER
+STRING ls $d -File -Force | % {if((gc $_.FullName -Raw -EA 0)-match'1101'){exit}}
+ENTER
+STRING function v{$p=Read-Host 'Boss PIN'-AsSecureString;$c=ConvertTo-SecureString '1337'-AsPlainText -Force;$BSTR=[Runtime.InteropServices.Marshal];$ok=($BSTR::PtrToStringAuto($BSTR::SecureStringToBSTR($p)) -eq '1337');$BSTR::ZeroFreeBSTR($BSTR::SecureStringToBSTR($p));return $ok}
+ENTER
+STRING gwmi Win32_UserAccount|?{$_.Name-match'backdoor|duck'}|%{"[!] USER $($_.Name)"|ac $log;if(v){net user "$($_.Name)" /del;"REMOVED"|ac $log}}
+ENTER
+STRING 'DuckBackdoor','ReverseShell'|%{schtasks /query /tn $_ 2>$null;if($?){ "[!] TASK $_"|ac $log;if(v){schtasks /delete /tn $_ /f;"REMOVED"|ac $log}}}
+ENTER
+STRING gci $env:USERPROFILE,$env:PUBLIC -Recurse -Include *duck*.txt,payload.txt,inject.bin -Force -EA 0 | % {
+ENTER
+STRING   $pl=$_.FullName;$first=(gc $pl -TotalCount 1 -EA 0)
+ENTER
+STRING   "[!] PAYLOAD $pl"|ac $log
+ENTER
+STRING   if($first -eq '#IMMUNE#'){"SKIPPED (shielded)"|ac $log}else{if(v){ri $pl -Force;"NUKED"|ac $log}}
+ENTER
+STRING }
+ENTER
+STRING "`nALL CLEAN. YANK USB."|ac $log
+ENTER
+STRING PAYLOAD_FINISHED()
+ENTER

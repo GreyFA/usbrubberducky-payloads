@@ -1,46 +1,132 @@
-
-
-REM It scans users, tasks, registry, specific files, and suspicious payloads.
-REM Report saved to X:\Report.txt (USB in storage mode at end).
-By: Mr.Ender
-
-
-
-
-DELAY 3000
-GUI r
-DELAY 200
-STRING powershell -ep Bypass -c "IEX (gc '%~f0' -raw)"
-ENTER
-STRING $d=[Environment]::GetFolderPath('Desktop')
-ENTER
-STRING md "$d\RubberDuckyAnalysis" -Force | Out-Null
-ENTER
-STRING $t=Get-Date -f yyyyMMdd_HHmmss
-ENTER
-STRING $log='X:\Report.txt'
-ENTER
-STRING "ENDER RESPECT v2025 - $t`n-----------------------------`n" | Out-File $log
-ENTER
-STRING ls $d -File -Force | % {if((gc $_.FullName -Raw -EA 0)-match'1101'){exit}}
-ENTER
-STRING function v{$p=Read-Host 'Boss PIN'-AsSecureString;$c=ConvertTo-SecureString '1337'-AsPlainText -Force;$BSTR=[Runtime.InteropServices.Marshal];$ok=($BSTR::PtrToStringAuto($BSTR::SecureStringToBSTR($p)) -eq '1337');$BSTR::ZeroFreeBSTR($BSTR::SecureStringToBSTR($p));return $ok}
-ENTER
-STRING gwmi Win32_UserAccount|?{$_.Name-match'backdoor|duck'}|%{"[!] USER $($_.Name)"|ac $log;if(v){net user "$($_.Name)" /del;"REMOVED"|ac $log}}
-ENTER
-STRING 'DuckBackdoor','ReverseShell'|%{schtasks /query /tn $_ 2>$null;if($?){ "[!] TASK $_"|ac $log;if(v){schtasks /delete /tn $_ /f;"REMOVED"|ac $log}}}
-ENTER
-STRING gci $env:USERPROFILE,$env:PUBLIC -Recurse -Include *duck*.txt,payload.txt,inject.bin -Force -EA 0 | % {
-ENTER
-STRING   $pl=$_.FullName;$first=(gc $pl -TotalCount 1 -EA 0)
-ENTER
-STRING   "[!] PAYLOAD $pl"|ac $log
-ENTER
-STRING   if($first -eq '#IMMUNE#'){"SKIPPED (shielded)"|ac $log}else{if(v){ri $pl -Force;"NUKED"|ac $log}}
-ENTER
-STRING }
-ENTER
-STRING "`nALL CLEAN. YANK USB."|ac $log
-ENTER
-STRING PAYLOAD_FINISHED()
-ENTER
+ 
+ 
+ REM Enhanced Anti-Virus scanner: scans users, scheduled tasks, files, registry, and suspicious payloads.
+ REM Report saved to X:\Report.txt (USB in storage mode at end).
+ REM Updated to detect new payload names and formats and to allow safe removal when a boss PIN is provided.
+ REM By: Mr.Ender (updated by GreyFA)
+ 
+ 
+ DELAY 3000
+ GUI r
+ DELAY 200
+ STRING powershell -ep Bypass -c "IEX (gc '%~f0' -raw)"
+ ENTER
+ 
+ # PowerShell script starts below (the ducky will run PowerShell which reads this file and executes the script section)
+ STRING $d=[Environment]::GetFolderPath('Desktop')
+ ENTER
+ STRING md "$d\RubberDuckyAnalysis" -Force | Out-Null
+ ENTER
+ STRING $t=Get-Date -f yyyyMMdd_HHmmss
+ ENTER
+ STRING $log='X:\Report.txt'
+ ENTER
+ STRING "ENDER RESPECT v2025 - $t`n-----------------------------`n" | Out-File $log
+ ENTER
+ STRING # quick signature check for legacy Ducky payloads
+ ENTER
+ STRING ls $d -File -Force | % {if((gc $_.FullName -Raw -EA 0)-match '1101'){"[!] LEGACY SIGNATURE FOUND in $($_.FullName)"|ac $log;}}
+ ENTER
+ STRING function ConfirmDelete{param($prompt='Boss PIN')
+ ENTER
+ STRING   $p=Read-Host $prompt -AsSecureString; $c=ConvertTo-SecureString '1337' -AsPlainText -Force; 
+ ENTER
+ STRING   $BSTR=[Runtime.InteropServices.Marshal]; $entered=($BSTR::PtrToStringAuto($BSTR::SecureStringToBSTR($p))); $check=($BSTR::PtrToStringAuto($BSTR::SecureStringToBSTR($c))); 
+ ENTER
+ STRING   return ($entered -eq $check)
+ ENTER
+ STRING }
+ ENTER
+ STRING $allowRemoval = $false
+ ENTER
+ STRING # Ask for PIN - if provided, allow destructive actions
+ ENTER
+ STRING try{ if(ConfirmDelete){$allowRemoval=$true; "[+] Removal AUTHORIZED"|ac $log}else{"[!] Removal DENIED - running in report-only mode"|ac $log}}catch{"[!] PIN ENTRY ERROR - running report-only mode"|ac $log}
+ ENTER
+ STRING # Users to look for (common backdoor/dev names + new payload names)
+ ENTER
+ STRING $userPatterns = 'backdoor','duck','payload','inject','audomad','audomagic','autorun','service'|%{$_}
+ ENTER
+ STRING gwmi Win32_UserAccount | Where-Object {$_.Name -match ('backdoor|duck|payload|inject|audomad|audomagic|autorun|service')} | ForEach-Object {
+ ENTER
+ STRING   "[!] USER $($_.Name) found (Local: $($_.LocalAccount))" | Out-File -FilePath $log -Append
+ ENTER
+ STRING   if($allowRemoval){
+ ENTER
+ STRING     try{ net user "$($_.Name)" /del; "REMOVED USER $($_.Name)"|ac $log }catch{"FAILED TO_REMOVE USER $($_.Name)"|ac $log}
+ ENTER
+ STRING   }
+ ENTER
+ STRING }
+ ENTER
+ STRING # Scheduled tasks commonly used by payloads
+ ENTER
+ STRING $tasks = @('DuckBackdoor','ReverseShell','AutoRunPayload','InjectTask','audomad_task')
+ ENTER
+ STRING foreach($tn in $tasks){
+ ENTER
+ STRING   schtasks /query /tn $tn 2>$null; if($?){ "[!] TASK $tn"|ac $log; if($allowRemoval){schtasks /delete /tn $tn /f; "REMOVED TASK $tn"|ac $log}}
+ ENTER
+ STRING }
+ ENTER
+ STRING # Search common locations for payload artifacts
+ ENTER
+ STRING $searchPaths = @($env:USERPROFILE, $env:PUBLIC, $d)
+ ENTER
+ STRING $patterns = '*duck*','payload.txt','inject.bin','*.bin','*.ps1','*.vbs','*.cmd','*.exe','*.scr','*.lnk','*autorun*','*payload*'
+ ENTER
+ STRING foreach($p in $searchPaths){
+ ENTER
+ STRING   try{ gci $p -Recurse -ErrorAction SilentlyContinue -Force -Include $patterns }catch{continue} | ForEach-Object {
+ ENTER
+ STRING     $pl=$_.FullName; $first=''
+ ENTER
+ STRING     try{ $first=(Get-Content $pl -TotalCount 1 -ErrorAction SilentlyContinue) }catch{}
+ ENTER
+ STRING     "[!] PAYLOAD $pl" | Out-File -FilePath $log -Append
+ ENTER
+ STRING     if($first -match '#IMMUNE#'){"SKIPPED (shielded) $pl"|ac $log}else{
+ ENTER
+ STRING       # Heuristic checks in-file for known signatures or obfuscation
+ ENTER
+ STRING       $body=''; try{$body=(Get-Content $pl -Raw -ErrorAction SilentlyContinue)}catch{}
+ ENTER
+ STRING       if($body -match '1101' -or $body -match 'INVOKE-'){"[!] CONTENT SIGNATURE MATCH in $pl"|ac $log}
+ ENTER
+ STRING       if($allowRemoval){
+ ENTER
+ STRING         try{ Remove-Item $pl -Force -ErrorAction Stop; "NUKED $pl"|ac $log }catch{"FAILED TO REMOVE $pl"|ac $log}
+ ENTER
+ STRING       }
+ ENTER
+ STRING     }
+ ENTER
+ STRING   }
+ ENTER
+ STRING }
+ ENTER
+ STRING # Check for suspicious registry autoruns (HKCU and HKLM)
+ ENTER
+ STRING $autorunKeys = @('HKCU:\Software\Microsoft\Windows\CurrentVersion\Run','HKLM:\Software\Microsoft\Windows\CurrentVersion\Run')
+ ENTER
+ STRING foreach($k in $autorunKeys){
+ ENTER
+ STRING   try{ Get-ItemProperty -Path $k -ErrorAction SilentlyContinue }catch{continue} | ForEach-Object {
+ ENTER
+ STRING     $_.PSObject.Properties | Where-Object { $_.Value -and ($_.Value -match 'duck' -or $_.Value -match 'payload' -or $_.Value -match 'inject') } | ForEach-Object {
+ ENTER
+ STRING       "[!] AUTORUN $($k) -> $($_.Name) = $($_.Value)"|ac $log
+ ENTER
+ STRING       if($allowRemoval){ try{ Remove-ItemProperty -Path $k -Name $_.Name -ErrorAction Stop; "REMOVED AUTORUN $($_.Name)"|ac $log }catch{"FAILED TO REMOVE AUTORUN $($_.Name)"|ac $log} }
+ ENTER
+ STRING     }
+ ENTER
+ STRING   }
+ ENTER
+ STRING }
+ ENTER
+ STRING "`nALL CLEAN. YANK USB.`n"|ac $log
+ ENTER
+ STRING PAYLOAD_FINISHED()
+ ENTER
+ 

@@ -141,7 +141,7 @@ The payload includes an automatic daily update check that:
 The `#CONFIG` setting uses 14 bits to control features:
 
 ```
-Position: 0  1  2  3  4  5  6  7  8  9  10 11 12 13
+Position:  0   1   2   3   4   5   6   7   8   9  10  11  12  13
 Feature:  USB DRP CUS PRO ACR RSV AVO STH AFR ASB AVM ACT UPD AUT
 
 Bit 0:  USB = Save to USB (1=yes, 0=no)

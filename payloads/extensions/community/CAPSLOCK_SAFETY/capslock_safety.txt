@@ -1,0 +1,43 @@
+EXTENSION CAPSLOCK_SAFETY
+REM VERSION 1.0
+REM AUTHOR: Mr.Ender
+REM_BLOCK  DOCUMENTATION
+
+    CapsLock safety kill switch.
+    If CapsLock is ON when payload starts — stop immediately.
+    TARGET: Any
+    USAGE: Place at top of payload, call SAFETY_CHECK()
+    Toggle CapsLock ON before plugging in to abort payload.
+
+END_REM
+
+REM Config
+
+REM Set to TRUE (  OR 1 ) to tern off the caplock and have to press caps within the timer
+DEFINE CAPS_RESET_FUNCTION-C 0
+VAR $TIMER_FUNCTION-C
+
+REM Speed of the funshen
+DEFINE DELAY_SPEED_FUNCTION-C 200
+
+
+FUNCTION CAPS_OFF_FUNCTION-C()
+  IF $_CAPSLOCK_ON THEN
+        CAPSLOCK
+  END_IF
+END_FUNCTION
+
+
+FUNCTION SAFETY_CHECK()
+  IF CAPS_RESET_FUNCTION-C THEN
+    SAVE
+  
+    DELAY DELAY_SPEED_FUNCTION-C
+    IF ($_CAPSLOCK_ON == TRUE) THEN
+        STOP_PAYLOAD
+    END_IF
+    CAPSLOCK
+END_FUNCTION
+
+REM SAFETY_CHECK()
+END_EXTENSION

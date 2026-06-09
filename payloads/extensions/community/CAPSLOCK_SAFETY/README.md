@@ -17,13 +17,7 @@ Useful as a safety abort — toggle CapsLock on before plugging in to prevent ac
 
 Place the extension at the top of your payload and call `SAFETY_CHECK()` before any payload logic.
 
-```ducky
-REM *** TYPE "CAPSLOCK_SAFETY" IN PAYLOADSTUDIO — SELECT FROM AUTOCOMPLETE ***
 
-SAFETY_CHECK()
-
-REM ... rest of your payload
-```
 
 ## How It Works
 
